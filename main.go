@@ -48,17 +48,14 @@ func main() {
 		//Lpush and rpop to implement queue
 		err = client.LPush(ctx, EVENT_KEY, string(eventJSON)).Err()
 		if err != nil {
+			log.Println(err.Error())
 			return fiber.NewError(fiber.StatusInternalServerError, "Event not accepted, please retry")
 		}
 
 		return c.SendStatus(fiber.StatusAccepted)
 	})
 
-	port := os.Getenv("PORT")
-	if port != "" {
-		port = ":3000"
-	}
-	err = app.Listen(port)
+	err = app.Listen(":3000")
 	if err != nil {
 		panic(err)
 	}
