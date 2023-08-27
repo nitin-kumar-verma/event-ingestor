@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
@@ -13,8 +14,9 @@ import (
 )
 
 type Event struct {
-	UserID  string `json:"userId"`
-	Payload string `json:"payload"`
+	UserID    string `json:"userId"`
+	Payload   string `json:"payload"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 const (
@@ -38,6 +40,7 @@ func main() {
 		if event.UserID == "" || event.Payload == "" {
 			return fiber.NewError(fiber.StatusBadRequest, "Invalid Json")
 		}
+		event.Timestamp = time.Now().UTC().Unix()
 		eventJSON, _ := json.Marshal(event)
 
 		ctx := context.Background()
@@ -51,7 +54,11 @@ func main() {
 		return c.SendStatus(fiber.StatusAccepted)
 	})
 
-	err = app.Listen(":3000")
+	port := os.Getenv("PORT")
+	if port != "" {
+		port = ":3000"
+	}
+	err = app.Listen(port)
 	if err != nil {
 		panic(err)
 	}
